@@ -85,7 +85,7 @@ As can be seen above, the environment variable "three" needs to be set to your A
 
 2. The load test needs to have the public IP address of the service in AKS that represents the source application. This is set in the load test by setting the value of the "webapp" parameter.
 
-![alt text](images/load-test-parameters.png "Load Test parameters")
+![alt text](images/loadtest-parameters.png "Load Test parameters")
 
 
 
