@@ -18,14 +18,78 @@ When there are no NAT ports left to service outbound connections, errors will oc
 
 ![alt text](/images/overview.png "Sample app overview")
 
-In order to demonstrate how NAT port exhaustion can occur, several thinga are needed:
+In order to demonstrate how NAT port exhaustion can occur, several things are needed:
 1. An application (web API) hosted in AKS that makes HTTP requests to a remote service - preferably outside the AKS VNet. It is also useful to be able to vary the target and to re-use or not HTTP connections to see how this impacts its behaviour. In this repository, this is referred to as the "source"
 2. A target application (web API) outside of AKS and preferably outside of the VNet that accepts requests from the source and returns responses. Some means of varying the response time from this service is also useful. In this repository, this is referred to as the "target".
 3. A means of driving load into the source in a reliable manner. A JMeter load test is used and driven by Azure load test https://learn.microsoft.com/en-gb/azure/load-testing/overview-what-is-azure-load-testing
 4. Monitoring AKS and the API in AKS.
 
+This repository has code for both the source and target REST APIs that may be used to test. The "source" application is a C# .NET Core web API and comes with a Dockerfile and deployment yaml for the AKS cluster.
 
-6. Async
+The target application is designed to run under an Azure App Service, so its a question of building this and deploying to an App Service. 
+
+### Configuration
+1. The source web app needs to have the target URL. It is best to therefore create an App Service in Azure and then use its FQDN for the configuration of the source. The deployment YAML for the source application is shown below:
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: request-send
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: request-send
+  template:
+    metadata:
+      labels:
+        app: request-send
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: request-send
+        image: jjnews.azurecr.io/requestsend:300
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1024Mi
+          limits:
+            cpu: 1500m
+            memory: 2048Mi
+        ports:
+        - containerPort: 8080
+        env:
+        - name: three
+          value: "https://mytargeturl.azurewebsites.net/weatherforecast"
+        - name: onenew
+          value: "true"
+        - name: twonew
+          value: "true"
+        - name: threenew
+          value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: request-send
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: request-send
+```
+As can be seen above, the environment variable "three" needs to be set to your App Service URL.
+
+2. The load test needs to have the public IP address of the service in AKS that represents the source application. This is set in the load test by setting the value of the "webapp" parameter.
+
+![alt text](images/load-test-parameters.png "Load Test parameters")
+
+
+
+ Async
 7. Reuse of connections
 8. The amount of data outbound from the AKS-hosted app to the dependency and how much data is returned from the dependency
 9. Generally how long a dependent call takes (as it is keeping the underlying TCP connection open)
