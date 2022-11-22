@@ -29,4 +29,6 @@ What can go wrong
 
 ## How to mitigate/remediate
 
+![alt text](https://learn.microsoft.com/en-us/azure/load-balancer/media/load-balancer-outbound-connections/outbound-options.png "NAT in Azure")
+
 # Conclusions
