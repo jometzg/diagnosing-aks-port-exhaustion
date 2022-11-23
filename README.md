@@ -14,6 +14,13 @@ Any applications deployed to an AKS cluster therefore will have a limited set NA
 
 When there are no NAT ports left to service outbound connections, errors will occur as connections will no longer be made correctly. This is what is referred to as "NAT port exhaustion".
 
+## Diagnosing
+
+Applications that suffer from NAT port exhaustion will initially see connect times to remote resources increase. There may not be be errors, but response times from remote connections will increase and the overall throughput of the API will go down.
+
+As ports are handed out by the load balancer that gets created when the AKS cluster is created, this is where to look for problems.
+
+
 ## Sample Application
 
 ![alt text](/images/overview.png "Sample app overview")
