@@ -20,6 +20,9 @@ Applications that suffer from NAT port exhaustion will initially see connect tim
 
 As ports are handed out by the load balancer that gets created when the AKS cluster is created, this is where to look for problems.
 
+![alt text](/images/load-balancer-metrics.png "Load balancer metrics")
+
+In the above diagram "SNAT Connection Count" is shown, split by connection state. There are two runs shown. In the first run, there are a large number of failed connections. These will lead to application-level errors. Though it does not appear to be the case that some connection failures will lead to errors at the application level - this may be due to retries in code or supporting libraries. In the second run, there are far fewer connection errors. 
 
 ## Sample Application
 
